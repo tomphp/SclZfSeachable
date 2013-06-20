@@ -1,17 +1,17 @@
 <?php
-namespace SclObjectManager\Controller\Plugin;
+namespace SclZfSearchable\Controller\Plugin;
 
-use SclObjectManager\ObjectManager as TheObjectManager;
+use SclZfSearchable\ObjectManager as TheObjectManager;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 /**
- * Controller plugin which returns a {@see \SclObjectManager\Searchable}
+ * Controller plugin which returns a {@see \SclZfSearchable\Searchable}
  *
  * @author Tom Oram <tom@scl.co.uk>
  */
 class Searchable extends AbstractPlugin
 {
-    const SEARCH_BUILDER_SERVICE = 'SclObjectManager\Searchable\SearchableBuilder';
+    const SEARCH_BUILDER_SERVICE = 'SclZfSearchable\Searchable\SearchableBuilder';
 
     /**
      * @param string $name
@@ -47,7 +47,7 @@ class Searchable extends AbstractPlugin
      * @param string            $name
      * @param string            $listName
      * @param array             $params
-     * @return \SclObjectManager\Searchable
+     * @return \SclZfSearchable\Searchable
      */
     protected function __invoke(TheObjectManager $objectManager, $name, $listName, $params = null)
     {

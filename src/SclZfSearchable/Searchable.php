@@ -1,9 +1,9 @@
 <?php
 
-namespace SclObjectManager;
+namespace SclZfSearchable;
 
-use SclObjectManager\Searchable\SearchInfo;
-use SclObjectManager\ObjectManagerInterface;
+use SclZfSearchable\Searchable\SearchInfo;
+use SclZfSearchable\ObjectManagerInterface;
 
 /**
  * Class which makes a list returned from object manager searchable.

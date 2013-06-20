@@ -1,6 +1,6 @@
 <?php
 
-namespace SclObjectManager\View\Helper;
+namespace SclZfSearchable\View\Helper;
 
 use Zend\View\Helper\AbstractHelper;
 

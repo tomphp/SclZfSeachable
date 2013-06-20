@@ -1,9 +1,9 @@
 <?php
 
-namespace SclObjectManager\Searchable;
+namespace SclZfSearchable\Searchable;
 
-use SclObjectManager\ObjectManager;
-use SclObjectManager\Searchable;
+use SclZfSearchable\ObjectManager;
+use SclZfSearchable\Searchable;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\Session\Container;
@@ -48,12 +48,12 @@ class SearchableBuilder implements ServiceLocatorAwareInterface
     {
         $container = new Container($containerName);
 
-        $searchInfo = $this->getServiceLocator()->get('SclObjectManager\Searchable\SearchInfo');
+        $searchInfo = $this->getServiceLocator()->get('SclZfSearchable\Searchable\SearchInfo');
 
         $searchInfo->setContainer($container)
             ->setName($name);
 
-        $searchable = $this->getServiceLocator()->get('SclObjectManager\Searchable');
+        $searchable = $this->getServiceLocator()->get('SclZfSearchable\Searchable');
 
         $searchable->setObjectManager($objectManager)
             ->setSearchInfo($searchInfo)

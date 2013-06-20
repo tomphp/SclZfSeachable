@@ -1,7 +1,7 @@
 <?php
-namespace SclObjectManager\Searchable;
+namespace SclZfSearchable\Searchable;
 
-use SclObjectManager\Searchable\SearchInfo;
+use SclZfSearchable\Searchable\SearchInfo;
 
 /**
  * Interface for Doctrine EntityRepository class which can be searched.

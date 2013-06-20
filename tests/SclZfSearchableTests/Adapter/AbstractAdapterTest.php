@@ -1,12 +1,13 @@
 <?php
 
-namespace SclObjectManager\Adapter;
+namespace SclZfSearchableTests\Adapter;
 
-use PHPUnit_Framework_TestCase;
+use SclZfSearchable\Adapter\AbstractAdapter;
 
-abstract class AbstractAdapterTest extends PHPUnit_Framework_TestCase
+abstract class AbstractAdapterTest extends \PHPUnit_Framework_TestCase
 {
     protected $adapter;
+
     protected $entityName;
 
     public function setUp()

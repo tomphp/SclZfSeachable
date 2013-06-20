@@ -1,6 +1,6 @@
 <?php
 
-namespace SclObjectManager\Searchable;
+namespace SclZfSearchable\Searchable;
 
 class SearchInfo
 {
