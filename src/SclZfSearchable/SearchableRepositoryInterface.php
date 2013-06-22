@@ -2,6 +2,8 @@
 
 namespace SclZfSearchable;
 
+use SclZfSearchable\SearchInfo\SearchInfoInterface;
+
 /**
  * Interface for setting the search info to be used for retrieving result sets.
  *
@@ -12,8 +14,8 @@ interface SearchableRepositoryInterface
     /**
      * Set the SearchInfo to be applied to the query.
      *
-     * @param  SearchInfo $searchInfo
+     * @param  SearchInfoInterface $searchInfo
      * @return self
      */
-    public function setSearchInfo(SearchInfo $searchInfo);
+    public function setSearchInfo(SearchInfoInterface $searchInfo);
 }

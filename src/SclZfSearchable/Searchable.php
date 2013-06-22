@@ -2,6 +2,7 @@
 
 namespace SclZfSearchable;
 
+use SclZfSearchable\Exception\DomainException;
 use SclZfSearchable\Exception\RuntimeException;
 use SclZfSearchable\SearchInfo\SearchInfoInterface;
 
@@ -78,7 +79,7 @@ class Searchable
      * @param  string $listName
      * @return self
      */
-    public function setListName($listName, $params = null)
+    public function setListName($listName, array $params = array())
     {
         $this->listName = (string) $listName;
 
@@ -107,11 +108,60 @@ class Searchable
     }
 
     /**
-     * @return \Traversable
+     * Get the searchable repository to return the results.
+     *
+     * @return array|\Traversable
+     * @throws RuntimeException When no repository has been set.
+     * @throws RuntimeException When the list name has not been set.
+     * @throws RuntimeException When the list doesn't exits.
+     * @throws RuntimeException If $this->searchInfo has not been set.
+     * @throws DomainException If the repository method doesn't return an array.
      */
     public function getList()
     {
-        call_user_func_array($this->repository, $this->listName, $this->params);
+        if (!$this->repository instanceof SearchableRepositoryInterface) {
+            throw new RuntimeException(
+                'A valid repository has not yet been set'
+                . ' in ' . __METHOD__ . '()'
+            );
+        }
+
+        if (null === $this->listName) {
+            throw new RuntimeException(
+                'The list name has not yet been set'
+                . ' in ' . __METHOD__ . '()'
+            );
+        }
+
+        if (!method_exists($this->repository, $this->listName)) {
+            throw new RuntimeException(
+                "A repository method with the name '{$this->listName}' doesn't exist"
+                . ' in ' . __METHOD__ . '()'
+            );
+        }
+
+        if (null === $this->searchInfo) {
+            throw new RuntimeException(
+                'The search info has not been set yet'
+                . ' in ' . __METHOD__ . '()'
+            );
+        }
+
+        $this->repository->setSearchInfo($this->searchInfo);
+
+        $results = call_user_func_array(
+            array($this->repository, $this->listName),
+            $this->params
+        );
+
+        if (!is_array($results) && !$results instanceof \Traversable) {
+            throw new DomainException(
+                "The repository's '{$this->listName}' method did not return an array"
+                . ' in ' . __METHOD__ . '()'
+            );
+        }
+
+        return $results;
     }
 
     /**
@@ -191,13 +241,14 @@ class Searchable
             && null === $order
         ) {
             $searchInfo->reset();
-            return;
+
+            return $this;
         }
 
         $searchInfo->setSearch($search);
         $searchInfo->setCurrentPage($currentPage);
         $searchInfo->setOrderBy($orderBy);
-        $searchInfo->setOrderAsc($order);
+        $searchInfo->setOrder($order);
         $searchInfo->setPageSize($pageSize);
 
         return $this;
