@@ -1,6 +1,8 @@
 <?php
 
-namespace SclZfSearchable\Searchable;
+namespace SclZfSearchable\SearchInfo;
+
+use SclZfSearchable\Exception\DomainException;
 
 /**
  * A basic implementation of a SearchInfo class.
@@ -19,18 +21,59 @@ class BasicSearchInfo implements SearchInfoInterface
      */
     protected $name;
 
+    /**
+     * The search string.
+     *
+     * @var string
+     */
+    protected $search = null;
 
     /**
-     * @param string $name
-     * @return SearchInfo
+     * The field name to sort by.
+     *
+     * @var string
+     */
+    protected $orderBy = null;
+
+    /**
+     * Is the sort ascending or decending.
+     *
+     * Can either by self::SORT_ASC or self::SORT_DESC.
+     *
+     * @var string
+     */
+    protected $order = self::SORT_ASC;
+
+    /**
+     * The number of the page to display.
+     *
+     * @var int
+     */
+    protected $currentPage = 1;
+
+    /**
+     * The number of results to dispaly per page.
+     *
+     * @var int
+     */
+    protected $pageSize = self::DEFAULT_PAGE_SIZE;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param  string $name
+     * @return self
      */
     public function setName($name)
     {
-        $this->name = $name;
+        $this->name = (string) $name;
+
         return $this;
     }
 
     /**
+     * {@inheritDoc}
+     *
      * @return string
      */
     public function getName()
@@ -40,126 +83,151 @@ class BasicSearchInfo implements SearchInfoInterface
 
 
     /**
-     * @return integer
-     */
-    public function getCurrentPage()
-    {
-        return $this->container->currentPage;
-    }
-
-    /**
-     * @param integer $page
-     * @return SearchInfo
-     */
-    public function setCurrentPage($page)
-    {
-        if (null !== $page) {
-            $this->container->currentPage = (int)$page;
-        }
-        return $this;
-    }
-
-    /**
+     * {@inheritDoc}
+     *
      * @return string
      */
     public function getSearch()
     {
-        return $this->container->search;
+        return $this->search;
     }
 
     /**
+     * {@inheritDoc}
+     *
      * @param string $search
-     * @return SearchInfo
+     * @return self
      */
     public function setSearch($search)
     {
-        if (null !== $search) {
-            $this->container->search = $search;
-            $this->container->currentPage = 1;
-        }
+        $this->search = (string) $search;
+
+        $this->setCurrentPage(1);
+
         return $this;
     }
 
     /**
+     * {@inheritDoc}
+     *
      * @return string
      */
     public function getOrderBy()
     {
-        return $this->container->orderBy;
+        return $this->orderBy;
     }
 
     /**
-     * @param string $orderBy
-     * @throws \Exception
-     * @return SearchInfo
+     * {@inheritDoc}
+     *
+     * @param  string $orderBy
+     * @throws DomainException If $order by contains illegal characters.
+     * @return self
      */
     public function setOrderBy($orderBy)
     {
-        if (null !== $orderBy) {
-            if (preg_match('/[^A-Za-z0-9_.-]/', $orderBy)) {
-                throw new \Exception('Order by string contains illegal characters.');
-            }
-            $this->container->orderBy = $orderBy;
+        if (preg_match('/[^A-Za-z0-9_.-]/', $orderBy)) {
+            throw new DomainException('Order by string contains illegal characters.');
         }
-        return $this;
-    }
 
-    /**
-     * @return boolean
-     */
-    public function getOrderAsc()
-    {
-        return $this->container->orderAsc;
-    }
-
-    /**
-     * @param mixed $order
-     * @return SearchInfo
-     */
-    public function setOrderAsc($order)
-    {
-        if (null !== $order) {
-            if (is_string($order)) {
-                $order = ($order == 'asc');
-            }
-
-            $this->container->orderAsc = (boolean)$order;
-        }
+        $this->orderBy = $orderBy;
 
         return $this;
     }
 
     /**
-     * @return integer
+     * {@inheritDoc}
+     *
+     * @return string
+     */
+    public function getOrder()
+    {
+        return $this->order;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param  string $order
+     * @return self
+     */
+    public function setOrder($order)
+    {
+        if (!in_array($order, array(self::SORT_ASC, self::SORT_DESC))) {
+            throw new DomainException(
+                sprintf(
+                    'Set order expects "%s" or "%s" got "%s" in %s',
+                    self::SORT_ASC,
+                    self::SORT_DESC,
+                    is_object($order) ? get_class($order) : gettype($order),
+                    __METHOD__
+                )
+            );
+        }
+
+        $this->order = $order;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return int
+     */
+    public function getCurrentPage()
+    {
+        return $this->currentPage;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param  int  $page
+     * @return self
+     */
+    public function setCurrentPage($page)
+    {
+        $this->currentPage = (int) $page;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return int
      */
     public function getPageSize()
     {
-        return $this->container->pageSize;
+        return $this->pageSize;
     }
 
     /**
-     * @param integer $pageSize
-     * @return SearchInfo
+     * {@inheritDoc}
+     *
+     * @param int   $pageSize
+     * @return self
      */
     public function setPageSize($pageSize)
     {
-        if (null !== $pageSize) {
-            $this->container->pageSize = (int)$pageSize;
-        }
+        $this->pageSize = (int) $pageSize;
+
         return $this;
     }
 
-
-
     /**
+     * {@inheritDoc}
      *
+     * @return void
      */
     public function reset()
     {
-        $this->container->currentPage = 1;
-        $this->container->search = null;
-        $this->container->orderBy = null;
-        $this->container->orderAsc = true;
-        $this->container->pageSize = self::DEFAULT_PAGE_SIZE;
+        $this->search  = null;
+        $this->orderBy = null;
+
+        $this->setOrder(self::SORT_ASC)
+             ->setCurrentPage(1)
+             ->setPageSize(self::DEFAULT_PAGE_SIZE);
     }
 }

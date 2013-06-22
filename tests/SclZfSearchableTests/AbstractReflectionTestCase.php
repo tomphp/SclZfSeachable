@@ -1,4 +1,7 @@
 <?php
+/**
+ * @todo Remove this, it's only kept here for reference.
+ */
 
 namespace SclObjectManager;
 

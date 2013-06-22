@@ -230,26 +230,40 @@ class Searchable
         }
 
         $search      = $request->getPost()->get($this->searchParamName());
-        $currentPage = $request->getQuery()->get($this->currentPageParamName());
         $orderBy     = $request->getQuery()->get($this->orderByParamName());
         $order       = $request->getQuery()->get($this->orderParamName());
+        $currentPage = $request->getQuery()->get($this->currentPageParamName());
         $pageSize    = $request->getQuery()->get($this->pageSizeParamName());
 
         if (null === $search
-            && null === $currentPage
             && null === $orderBy
             && null === $order
+            && null === $currentPage
         ) {
             $searchInfo->reset();
 
             return $this;
         }
 
-        $searchInfo->setSearch($search);
-        $searchInfo->setCurrentPage($currentPage);
-        $searchInfo->setOrderBy($orderBy);
-        $searchInfo->setOrder($order);
-        $searchInfo->setPageSize($pageSize);
+        if (null !== $search) {
+            $searchInfo->setSearch($search);
+        }
+
+        if (null !== $orderBy) {
+            $searchInfo->setOrderBy($orderBy);
+        }
+
+        if (null !== $order) {
+            $searchInfo->setOrder($order);
+        }
+
+        if (null !== $currentPage) {
+            $searchInfo->setCurrentPage($currentPage);
+        }
+
+        if (null !== $pageSize) {
+            $searchInfo->setPageSize($pageSize);
+        }
 
         return $this;
     }

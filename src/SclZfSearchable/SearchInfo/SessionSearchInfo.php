@@ -2,38 +2,42 @@
 
 namespace SclZfSearchable\Searchable;
 
-class SearchInfo
+use SclZfSearchable\Exception\RuntimeError;
+use Zend\Session\Container;
+
+class SessionSearchInfo implements SearchInfoInterface
 {
     /**
      * The default number of items to show per page.
      */
     const DEFAULT_PAGE_SIZE = 15;
 
-    /**
-     * @var string
-     */
-    private $name;
+    const KEY_SEARCH    = 'search';
+    const KEY_ORDER_BY  = 'orderBy';
+    const KEY_ORDER     = 'order';
+    const KEY_PAGE_NUM  = 'currentPage';
+    const KEY_PAGE_SIZE = 'pageSize';
 
     /**
-     * @var unknown_type
+     * The session container.
+     *
+     * @var Container
      */
     protected $container;
 
-    const SEARCH_PARAM       = 'search';
-    const CURRENT_PAGE_PARAM = 'page';
-    const ORDERBY_PARAM      = 'sortcol';
-    const ORDER_PARAM        = 'sortorder';
-    const PAGE_SIZE_PARAM    = 'pagesize';
-
     /**
-     * @param object $container
-     * @return SearchInfo
+     * @param  Container $container
+     * @return self
      */
-    public function setContainer($container)
+    public function setContainer(Container $container)
     {
         $this->container = $container;
 
-        if (!isset($this->container->currentPage)) {
+        $name = $this->name;
+
+        if (!isset($this->container->$name)) {
+            $this->container->$name = array();
+
             $this->reset();
         }
 
@@ -41,42 +45,50 @@ class SearchInfo
     }
 
     /**
-     * @param string $name
-     * @return SearchInfo
+     * Stores a value to the session container.
+     *
+     * @param  string $key
+     * @param  mixed  $value
+     * @return void
+     * @throws RuntimeError If the session container has not been set yet.
      */
-    public function setName($name)
+    protected function storeValue($key, $value)
     {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-
-    /**
-     * @return integer
-     */
-    public function getCurrentPage()
-    {
-        return $this->container->currentPage;
-    }
-
-    /**
-     * @param integer $page
-     * @return SearchInfo
-     */
-    public function setCurrentPage($page)
-    {
-        if (null !== $page) {
-            $this->container->currentPage = (int)$page;
+        if (null === $this->container) {
+            throw RuntimeError(
+                'Session container has not been set yet'
+                ' in ' . __METHOD__ . '()'
+            );
         }
-        return $this;
+
+        $name = $this->name;
+
+        $this->container->$name[$key] = $value;
+    }
+
+    /**
+     * Stores a value to the session container.
+     *
+     * @param  string $key
+     * @return void
+     * @throws RuntimeError If the session container has not been set yet.
+     */
+    protected function retrieveValue($key)
+    {
+        if (null === $this->container) {
+            throw RuntimeError(
+                'Session container has not been set yet'
+                ' in ' . __METHOD__ . '()'
+            );
+        }
+
+        $name = $this->name;
+
+        if (!isset($this->container->$name[$key])) {
+            return null;
+        }
+
+        return $this->container->$name[$key];
     }
 
     /**
@@ -84,7 +96,7 @@ class SearchInfo
      */
     public function getSearch()
     {
-        return $this->container->search;
+        return $this->retrieveValue(self::KEY_SEARCH);
     }
 
     /**
@@ -93,10 +105,8 @@ class SearchInfo
      */
     public function setSearch($search)
     {
-        if (null !== $search) {
-            $this->container->search = $search;
-            $this->container->currentPage = 1;
-        }
+        $this->storeValue(self::KEY_SEARCH, (string) $search);
+
         return $this;
     }
 
@@ -105,7 +115,7 @@ class SearchInfo
      */
     public function getOrderBy()
     {
-        return $this->container->orderBy;
+        return $this->retrieveValue(self::KEY_ORDER_BY);
     }
 
     /**
@@ -115,36 +125,61 @@ class SearchInfo
      */
     public function setOrderBy($orderBy)
     {
-        if (null !== $orderBy) {
-            if (preg_match('/[^A-Za-z0-9_.-]/', $orderBy)) {
-                throw new \Exception('Order by string contains illegal characters.');
-            }
-            $this->container->orderBy = $orderBy;
+        if (preg_match('/[^A-Za-z0-9_.-]/', $orderBy)) {
+            throw new DomainException('Order by string contains illegal characters.');
         }
+
+        $this->storeValue(self::KEY_ORDER_BY, (string) $orderBy);
+
         return $this;
     }
 
     /**
      * @return boolean
      */
-    public function getOrderAsc()
+    public function getOrder()
     {
-        return $this->container->orderAsc;
+        return $this->retrieveValue(self::KEY_ORDER);
     }
 
     /**
      * @param mixed $order
      * @return SearchInfo
      */
-    public function setOrderAsc($order)
+    public function setOrder($order)
     {
-        if (null !== $order) {
-            if (is_string($order)) {
-                $order = ($order == 'asc');
-            }
-
-            $this->container->orderAsc = (boolean)$order;
+        if (!in_array($order, array(self::SORT_ASC, self::SORT_DESC))) {
+            throw new DomainException(
+                sprintf(
+                    'Set order expects "%s" or "%s" got "%s" in %s',
+                    self::SORT_ASC,
+                    self::SORT_DESC,
+                    is_object($order) ? get_class($order) : gettype($order),
+                    __METHOD__
+                )
+            );
         }
+
+        $this->storeValue(self::KEY_ORDER, $order);
+
+        return $this;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getCurrentPage()
+    {
+        return $this->retrieveValue(self::KEY_PAGE_NUM);
+    }
+
+    /**
+     * @param integer $page
+     * @return SearchInfo
+     */
+    public function setCurrentPage($page)
+    {
+        $this->storeValue(self::KEY_PAGE_NUM, (int) $page);
 
         return $this;
     }
@@ -154,7 +189,7 @@ class SearchInfo
      */
     public function getPageSize()
     {
-        return $this->container->pageSize;
+        return $this->retrieveValue(self::KEY_PAGE_SIZE);
     }
 
     /**
@@ -163,90 +198,23 @@ class SearchInfo
      */
     public function setPageSize($pageSize)
     {
-        if (null !== $pageSize) {
-            $this->container->pageSize = (int)$pageSize;
-        }
+        $this->storeValue(self::KEY_PAGE_SIZE, (int) $pageSize);
+
         return $this;
     }
 
-
     /**
-     * @return string
-     */
-    public function searchParamName()
-    {
-        return $this->name . '_' . self::SEARCH_PARAM;
-    }
-
-    /**
-     * @return string
-     */
-    public function currentPageParamName()
-    {
-        return $this->name . '_' . self::CURRENT_PAGE_PARAM;
-    }
-
-    /**
-     * @return string
-     */
-    public function orderByParamName()
-    {
-        return $this->name . '_' . self::ORDERBY_PARAM;
-    }
-
-    /**
-     * @return string
-     */
-    public function orderParamName()
-    {
-        return $this->name . '_' . self::ORDER_PARAM;
-    }
-
-    /**
-     * @return string
-     */
-    public function pageSizeParamName()
-    {
-        return $this->name . '_' . self::PAGE_SIZE_PARAM;
-    }
-
-
-    /**
-     * @param \Zend\Http\Request $request
-     */
-    public function setValues(\Zend\Http\Request $request)
-    {
-        $search      = $request->getPost()->get($this->searchParamName());
-        $currentPage = $request->getQuery()->get($this->currentPageParamName());
-        $orderBy     = $request->getQuery()->get($this->orderByParamName());
-        $order       = $request->getQuery()->get($this->orderParamName());
-        $pageSize    = $request->getQuery()->get($this->pageSizeParamName());
-
-        if (null === $search
-            && null === $currentPage
-            && null === $orderBy
-            && null === $order
-        ) {
-            $this->reset();
-            return;
-        }
-
-        $this->setSearch($search);
-        $this->setCurrentPage($currentPage);
-        $this->setOrderBy($orderBy);
-        $this->setOrderAsc($order);
-        $this->setPageSize($pageSize);
-    }
-
-    /**
+     * {@inheritDoc}
      *
+     * @return void
      */
     public function reset()
     {
-        $this->container->currentPage = 1;
-        $this->container->search = null;
-        $this->container->orderBy = null;
-        $this->container->orderAsc = true;
-        $this->container->pageSize = self::DEFAULT_PAGE_SIZE;
+        $this->storeValue(self::KEY_SEARCH, null);
+        $this->storeValue(self::KEY_ORDER_BY, null);
+
+        $this->setOrder(self::SORT_ASC)
+             ->setCurrentPage(1)
+             ->setPageSize(self::DEFAULT_PAGE_SIZE);
     }
 }
