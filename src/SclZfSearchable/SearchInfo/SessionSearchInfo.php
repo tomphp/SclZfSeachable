@@ -6,7 +6,6 @@ class SearchInfo
 {
     /**
      * The default number of items to show per page.
-     * @const
      */
     const DEFAULT_PAGE_SIZE = 15;
 
@@ -27,7 +26,6 @@ class SearchInfo
     const PAGE_SIZE_PARAM    = 'pagesize';
 
     /**
-     *
      * @param object $container
      * @return SearchInfo
      */

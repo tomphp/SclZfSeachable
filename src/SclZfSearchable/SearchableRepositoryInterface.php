@@ -7,7 +7,7 @@ namespace SclZfSearchable;
  *
  * @author Tom Oram <tom@scl.co.uk>
  */
-interface SearchableInterface
+interface SearchableRepositoryInterface
 {
     /**
      * Set the SearchInfo to be applied to the query.
