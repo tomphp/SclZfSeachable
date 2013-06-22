@@ -3,57 +3,8 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "8aaf414aec33e76fd23376d257aa697d",
+    "hash": "1c821a6d8d9c84766f9f1d03cfd578ff",
     "packages": [
-        {
-            "name": "sclinternet/scl-zf-utilities",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/SCLInternet/SclZfUtilities.git",
-                "reference": "00717eadba0426165c45b48e42b099b535311bfb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/SCLInternet/SclZfUtilities/zipball/00717eadba0426165c45b48e42b099b535311bfb",
-                "reference": "00717eadba0426165c45b48e42b099b535311bfb",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.3"
-            },
-            "require-dev": {
-                "doctrine/doctrine-module": "0.*",
-                "doctrine/doctrine-orm-module": "0.*",
-                "phpmd/phpmd": "1.4.0",
-                "phpunit/phpunit": "3.7.*",
-                "satooshi/php-coveralls": "dev-master",
-                "squizlabs/php_codesniffer": "1.*"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "SclZfUtilities": "src/"
-                },
-                "classmap": [
-                    "./Module.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Tom Oram",
-                    "email": "tom@scl.co.uk",
-                    "homepage": "http://github.com/tomphp"
-                }
-            ],
-            "description": "A useful set of classes and interfaces for developping Zend Framework 2 applications",
-            "homepage": "https://github.com/SCLInternet/SclZfUtilities",
-            "time": "2013-06-03 11:36:38"
-        },
         {
             "name": "zendframework/zendframework",
             "version": "2.2.1",
@@ -1082,12 +1033,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/satooshi/php-coveralls.git",
-                "reference": "6193efec1a6aa15d953ca0f87afab39d1dd98489"
+                "reference": "a6eaac8145af484f73aaa6a086e459b62e99568e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/satooshi/php-coveralls/zipball/6193efec1a6aa15d953ca0f87afab39d1dd98489",
-                "reference": "6193efec1a6aa15d953ca0f87afab39d1dd98489",
+                "url": "https://api.github.com/repos/satooshi/php-coveralls/zipball/a6eaac8145af484f73aaa6a086e459b62e99568e",
+                "reference": "a6eaac8145af484f73aaa6a086e459b62e99568e",
                 "shasum": ""
             },
             "require": {
@@ -1144,7 +1095,56 @@
                 "github",
                 "test"
             ],
-            "time": "2013-06-15 04:57:08"
+            "time": "2013-06-21 13:22:27"
+        },
+        {
+            "name": "sclinternet/scl-zf-utilities",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SCLInternet/SclZfUtilities.git",
+                "reference": "00717eadba0426165c45b48e42b099b535311bfb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SCLInternet/SclZfUtilities/zipball/00717eadba0426165c45b48e42b099b535311bfb",
+                "reference": "00717eadba0426165c45b48e42b099b535311bfb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "doctrine/doctrine-module": "0.*",
+                "doctrine/doctrine-orm-module": "0.*",
+                "phpmd/phpmd": "1.4.0",
+                "phpunit/phpunit": "3.7.*",
+                "satooshi/php-coveralls": "dev-master",
+                "squizlabs/php_codesniffer": "1.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "SclZfUtilities": "src/"
+                },
+                "classmap": [
+                    "./Module.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tom Oram",
+                    "email": "tom@scl.co.uk",
+                    "homepage": "http://github.com/tomphp"
+                }
+            ],
+            "description": "A useful set of classes and interfaces for developping Zend Framework 2 applications",
+            "homepage": "https://github.com/SCLInternet/SclZfUtilities",
+            "time": "2013-06-03 11:36:38"
         },
         {
             "name": "squizlabs/php_codesniffer",
@@ -1677,8 +1677,8 @@
     ],
     "minimum-stability": "stable",
     "stability-flags": {
-        "sclinternet/scl-zf-utilities": 20,
         "zf-commons/zfc-user-doctrine-orm": 20,
+        "sclinternet/scl-zf-utilities": 20,
         "satooshi/php-coveralls": 20
     },
     "platform": {
