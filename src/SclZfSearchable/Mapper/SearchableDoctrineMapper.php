@@ -6,6 +6,7 @@ use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DPAdapter;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
+use SclZfSearchable\Exception\RuntimeException;
 use SclZfSearchable\SearchableRepositoryInterface;
 use SclZfSearchable\SearchInfo\SearchInfoInterface;
 use SclZfUtilities\Mapper\GenericDoctrineMapper;
@@ -67,11 +68,18 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
     /**
      * Applies the given search terms to the query builder's where clause.
      *
-     * @param  QueryBuilder $qb
+     * @param  QueryBuilder     $qb
      * @return QueryBuilder
+     * @throws RuntimeException When called with out searchInfo being set.
      */
     public function queryAddSearch(QueryBuilder $qb)
     {
+        if (null === $this->searchInfo) {
+            throw new RuntimeException(
+                __METHOD__ . ' was called without SearchInfo being set.'
+            );
+        }
+
         if (null === $this->searchInfo->getSearch()) {
             return $qb;
         }
@@ -92,11 +100,18 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
     /**
      * Sets up the query's order by clause.
      *
-     * @param  QueryBuilder $qb
+     * @param  QueryBuilder     $qb
      * @return QueryBuilder
+     * @throws RuntimeException When called with out searchInfo being set.
      */
     public function queryAddOrderBy(QueryBuilder $qb)
     {
+        if (null === $this->searchInfo) {
+            throw new RuntimeException(
+                __METHOD__ . ' was called without SearchInfo being set.'
+            );
+        }
+
         if (null === $this->searchInfo->getOrderBy()) {
             return $qb;
         }
