@@ -2,10 +2,14 @@
 
 namespace SclZfSearchable\Mapper;
 
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DPAdapter;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 use SclZfSearchable\SearchableRepositoryInterface;
 use SclZfSearchable\SearchInfo\SearchInfoInterface;
 use SclZfUtilities\Mapper\GenericDoctrineMapper;
+use Zend\Paginator\Paginator as ZendPaginator;
 
 /**
  * Simple doctrine mapper which provides a searchable fetchall.
@@ -106,15 +110,35 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
         return $qb;
     }
 
+    /**
+     * Paginates the results from a doctrine query.
+     *
+     * @param  Query $query
+     * @return ZendPaginator
+     */
+    protected function paginateQuery(Query $query)
+    {
+        $doctrinePaginator = new DoctrinePaginator($query);
 
+        $paginator = new ZendPaginator(new DPAdapter($doctrinePaginator));
+
+        $paginator->setItemCountPerPage($this->searchInfo->getPageSize());
+        $paginator->setCurrentPageNumber($this->searchInfo->getCurrentPage());
+
+        return $paginator;
+    }
 
     /**
      * Returns all entities that match the search criteria.
      *
-     * @return array
+     * @return ZendPaginator|array
      */
     public function fetchAll()
     {
+        if (null === $this->searchInfo) {
+            return parent::fetchAll();
+        }
+
         $qb = $this->entityManager->createQueryBuilder();
 
         $qb->select(self::ENTITY)
@@ -125,6 +149,6 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
         $this->queryAddOrderBy($qb);
 
         // @todo Maybe convert this to an array?
-        return $qb->getQuery->getResult();
+        return $this->paginateQuery($qb->getQuery());
     }
 }
