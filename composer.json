@@ -1,0 +1,35 @@
+{
+    "name": "sclinternet/scl-zf-searchable",
+    "description": "Module for Zend Framework 2 applications for easy searching, sorting and paginating of results",
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/SCLInternet/SclZfSearchable",
+    "authors": [
+        {
+            "name": "Tom Oram",
+            "email": "tom@x2k.co.uk",
+            "homepage": "http://github.com/tomphp"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "2.*"
+    },
+    "require-dev": {
+        "zf-commons/zfc-user-doctrine-orm": "dev-master",
+        "sclinternet/scl-zf-utilities": "dev-master",
+        "phpunit/phpunit" : "3.7.*",
+        "phpmd/phpmd" : "1.4.0",
+        "squizlabs/php_codesniffer": "1.*",
+        "satooshi/php-coveralls": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "SclZfSearchable\\": "src/"
+        },
+        "classmap": [
+            "./Module.php"
+        ]
+    }
+
+}
