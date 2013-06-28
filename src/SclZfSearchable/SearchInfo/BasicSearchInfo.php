@@ -81,7 +81,6 @@ class BasicSearchInfo implements SearchInfoInterface
         return $this->name;
     }
 
-
     /**
      * {@inheritDoc}
      *

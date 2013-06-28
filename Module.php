@@ -1,16 +1,24 @@
 <?php
 
-namespace SclObjectManager;
+namespace SclZfSearchable;
 
-use SclObjectManager\EntityFormBuilder;
-use SclObjectManager\EntityFormBuilder\EntityManagerAssociation;
+use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
+use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\ModuleManager\Feature\ServiceProviderInterface;
 
 /**
+ * Zend Framework 2 module class for the SclZfSearchable module.
+ *
  * @author Tom Oram
  */
-class Module
+class Module implements
+    AutoloaderProviderInterface,
+    ConfigProviderInterface,
+    ServiceProviderInterface
 {
     /**
+     * {@inheritDoc}
+     *
      * @return array
      */
     public function getAutoloaderConfig()
@@ -28,6 +36,8 @@ class Module
     }
 
     /**
+     * {@inheritDoc}
+     *
      * @return array
      */
     public function getConfig()
@@ -35,9 +45,7 @@ class Module
         return array(
             'controller_plugins' => array(
                 'invokables' => array(
-                    'getFormBuilder' => 'SclObjectManager\Controller\Plugin\FormBuilder',
                     'getSearchable'  => 'SclObjectManager\Controller\Plugin\Searchable',
-                    'createObjectManager'  => 'SclObjectManager\Controller\Plugin\ObjectManager',
                 ),
             ),
             'view_helpers' => array(
@@ -49,39 +57,34 @@ class Module
     }
 
     /**
+     * {@inheritDoc}
+     *
      * @return array
      */
     public function getServiceConfig()
     {
         return array(
             'shared' => array(
-                'SclObjectManager\ObjectManager'             => false,
-                'SclObjectManager\Adapter\AutoObjectAdapter' => false,
-                'SclObjectManager\Searchable'                => false,
-                'SclObjectManager\Searchable\SearchInfo'     => false,
+                'SclZfSearchable\Searchable'                     => false,
+                'SclZfSearchable\SearchInfo\SearchInfoInterface' => false,
+                'SclZfSearchable\SearchInfo\BasicSearchInfo'     => false,
+                'SclZfSearchable\SearchInfo\SessionSearchInfo'   => false,
+            ),
+            'aliases' => array(
+                'SclZfSearchable\SearchInfo\SearchInfoInterface' => 'SclZfSearchable\SearchInfo\SessionSearchInfo',
             ),
             'invokables' => array(
-                'SclObjectManager\Adapter\AutoObjectAdapter'    => 'SclObjectManager\Adapter\AutoObjectAdapter',
-                'SclObjectManager\Searchable'                   => 'SclObjectManager\Searchable',
-                'SclObjectManager\Searchable\SearchableBuilder' => 'SclObjectManager\Searchable\SearchableBuilder',
-                'SclObjectManager\Searchable\SearchInfo'        => 'SclObjectManager\Searchable\SearchInfo',
-                'Zend\Form\Annotation\AnnotationBuilder'        => 'Zend\Form\Annotation\AnnotationBuilder',
+                'SclZfSearchable\Searchable'                   => 'SclZfSearchable\Searchable',
+                'SclZfSearchable\SearchInfo\BasicSearchInfo'   => 'SclZfSearchable\SearchInfo\BasicSearchInfo',
+                'scl_zf_searchable_session_container'          => 'Zend\Session\Container',
             ),
             'factories' => array(
-                'SclObjectManager\ObjectManager' => function ($sm) {
-                    $entityManager = $sm->get('doctrine.entitymanager.orm_default');
-                    $objectManager = new ObjectManager($entityManager);
-                    return $objectManager;
-                },
-                'SclObjectManager\EntityFormBuilder' => function ($sm) {
-                    $entityManager = $sm->get('doctrine.entitymanager.orm_default');
-                    $request = $sm->get('Request');
-                    $formBuilder = new EntityFormBuilder($entityManager, $request);
-                    return $formBuilder;
-                },
-                'SclObjectManager\EntityFormBuilder\EntityManagerAssociation' => function ($sm) {
-                    $entityManager = $sm->get('doctrine.entitymanager.orm_default');
-                    return new EntityManagerAssociation($entityManager);
+                'SclZfSearchable\SearchInfo\SessionSearchInfo' => function ($sm) {
+                    $searchInfo = new \SclZfSearchable\SearchInfo\SessionSearchInfo();
+
+                    $searchInfo->setContainer($sm->get('scl_zf_searchable_session_container'));
+
+                    return $searchInfo;
                 }
             ),
         );
