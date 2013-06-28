@@ -188,11 +188,48 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
              ->method('getOrderBy')
              ->will($this->returnValue(null));
 
-        $this->queryBuilder->expects($this->never())->method('orderby');
+        $this->queryBuilder->expects($this->never())->method('orderBy');
 
         $result = $this->mapper->queryAddOrderBy($this->queryBuilder);
 
         $this->assertEquals($this->queryBuilder, $result);
     }
 
+    /**
+     * Test that when the order by value is null the query builder is just returned.
+     *
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::queryAddOrderBy
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchInfo
+     *
+     * @return void
+     */
+    public function testQueryAddOrderByComplete()
+    {
+        $fieldName = 'testfield';
+
+        $result = $this->mapper->setSearchInfo($this->searchInfo);
+
+        $this->assertEquals($this->mapper, $result, 'setSearchInfo didn\'t return $this');
+
+        $this->searchInfo
+             ->expects($this->atLeastOnce())
+             ->method('getOrderBy')
+             ->will($this->returnValue($fieldName));
+
+        $this->searchInfo
+             ->expects($this->once())
+             ->method('getOrder')
+             ->will($this->returnValue(\SclZfSearchable\SearchInfo\SearchInfoInterface::SORT_DESC));
+
+        $field = 'e.' . $fieldName;
+
+        $this->queryBuilder
+             ->expects($this->once())
+             ->method('orderBy')
+             ->with($this->equalTo($field), $this->equalTo('DESC'));
+
+        $result = $this->mapper->queryAddOrderBy($this->queryBuilder);
+
+        $this->assertEquals($this->queryBuilder, $result);
+    }
 }

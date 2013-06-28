@@ -1,6 +1,6 @@
 <?php
 
-namespace SclZfSearchable\Searchable;
+namespace SclZfSearchable\SearchInfo;
 
 use SclZfSearchable\Exception\RuntimeException;
 use SclZfSearchable\Exception\DomainException;
@@ -62,7 +62,7 @@ class SessionSearchInfo implements SearchInfoInterface
     protected function storeValue($key, $value)
     {
         if (null === $this->container) {
-            throw RuntimeError(
+            throw new RuntimeException(
                 'Session container has not been set yet'
                 . ' in ' . __METHOD__ . '()'
             );
