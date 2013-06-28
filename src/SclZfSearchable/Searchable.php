@@ -215,6 +215,23 @@ class Searchable
     }
 
     /**
+     * Sets a search info parameter to a value if the value is not null.
+     *
+     * @param SearchInfoInterface $searchInfo searchInfo
+     * @param mixed $method method
+     * @param mixed $value value
+     * @return void
+     */
+    protected function setIfNotNull(SearchInfoInterface $searchInfo, $method, $value)
+    {
+        if (null === $value) {
+            return;
+        }
+
+        $searchInfo->$method($value);
+    }
+
+    /**
      * Updates the search values from the current request.
      *
      * @param  \Zend\Http\Request $request
@@ -245,25 +262,11 @@ class Searchable
             return $this;
         }
 
-        if (null !== $search) {
-            $searchInfo->setSearch($search);
-        }
-
-        if (null !== $orderBy) {
-            $searchInfo->setOrderBy($orderBy);
-        }
-
-        if (null !== $order) {
-            $searchInfo->setOrder($order);
-        }
-
-        if (null !== $currentPage) {
-            $searchInfo->setCurrentPage($currentPage);
-        }
-
-        if (null !== $pageSize) {
-            $searchInfo->setPageSize($pageSize);
-        }
+        $this->setIfNotNull($searchInfo, 'setSearch', $search);
+        $this->setIfNotNull($searchInfo, 'setOrderBy', $orderBy);
+        $this->setIfNotNull($searchInfo, 'setOrder', $order);
+        $this->setIfNotNull($searchInfo, 'setCurrentPage', $currentPage);
+        $this->setIfNotNull($searchInfo, 'setPageSize', $pageSize);
 
         return $this;
     }

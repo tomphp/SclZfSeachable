@@ -71,6 +71,7 @@ class BasicSearchInfoTest extends \PHPUnit_Framework_TestCase
             array('name', 'test-name'),
             array('search', 'search terms'),
             array('orderBy', 'sortcolumn'),
+            array('order', 'asc'),
             array('order', 'desc'),
             array('currentPage', 12),
             array('pageSize', 20),
@@ -95,7 +96,7 @@ class BasicSearchInfoTest extends \PHPUnit_Framework_TestCase
      * Test that when setOrder is called with a bad string an exception is thrown.
      *
      * @dataProvider      badColumnNames
-     * @covers            SclZfSearchable\SearchInfo\BasicSearchInfo::setSearch
+     * @covers            SclZfSearchable\SearchInfo\BasicSearchInfo::setOrderBy
      * @expectedException SclZfSearchable\Exception\DomainException
      *
      * @return void
@@ -123,6 +124,19 @@ class BasicSearchInfoTest extends \PHPUnit_Framework_TestCase
                 array('\''),
                 array('\\'),
         );
+    }
+
+    /**
+     * Test that an exception gets thrown when setOrder is called with an illegal value.
+     *
+     * @covers            SclZfSearchable\SearchInfo\BasicSearchInfo::setOrder
+     * @expectedException SclZfSearchable\Exception\DomainException
+     *
+     * @return void
+     */
+    public function testSetOrderWithBadValue()
+    {
+        $this->searchInfo->setOrder('not-desc-or-asc');
     }
 
     /**

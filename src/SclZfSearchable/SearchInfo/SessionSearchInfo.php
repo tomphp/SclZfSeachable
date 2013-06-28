@@ -1,10 +1,16 @@
 <?php
 
-namespace SclZfSearchable\Searchable;
+namespace SclZfSearchable\SearchInfo;
 
-use SclZfSearchable\Exception\RuntimeError;
+use SclZfSearchable\Exception\RuntimeException;
+use SclZfSearchable\Exception\DomainException;
 use Zend\Session\Container;
 
+/**
+ * An SearchInfo implementation which stores it values in session.
+ *
+ * @author Tom Oram <tom@scl.co.uk>
+ */
 class SessionSearchInfo implements SearchInfoInterface
 {
     /**
@@ -28,6 +34,7 @@ class SessionSearchInfo implements SearchInfoInterface
     /**
      * @param  Container $container
      * @return self
+     * @todo   Maybe use the constructor to set this.
      */
     public function setContainer(Container $container)
     {
@@ -55,9 +62,9 @@ class SessionSearchInfo implements SearchInfoInterface
     protected function storeValue($key, $value)
     {
         if (null === $this->container) {
-            throw RuntimeError(
+            throw new RuntimeException(
                 'Session container has not been set yet'
-                ' in ' . __METHOD__ . '()'
+                . ' in ' . __METHOD__ . '()'
             );
         }
 
@@ -69,7 +76,7 @@ class SessionSearchInfo implements SearchInfoInterface
     /**
      * Stores a value to the session container.
      *
-     * @param  string $key
+     * @param  string       $key
      * @return void
      * @throws RuntimeError If the session container has not been set yet.
      */
@@ -78,7 +85,7 @@ class SessionSearchInfo implements SearchInfoInterface
         if (null === $this->container) {
             throw RuntimeError(
                 'Session container has not been set yet'
-                ' in ' . __METHOD__ . '()'
+                . ' in ' . __METHOD__ . '()'
             );
         }
 
@@ -92,6 +99,31 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @param  string $name
+     * @return self
+     */
+    public function setName($name)
+    {
+        $this->name = (string) $name;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @return string
      */
     public function getSearch()
@@ -100,8 +132,10 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
-     * @param string $search
-     * @return SearchInfo
+     * {@inheritDoc}
+     *
+     * @param  string $search
+     * @return self
      */
     public function setSearch($search)
     {
@@ -111,6 +145,8 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
+     * {@inheritDoc}
+     *
      * @return string
      */
     public function getOrderBy()
@@ -119,9 +155,11 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
-     * @param string $orderBy
-     * @throws \Exception
-     * @return SearchInfo
+     * {@inheritDoc}
+     *
+     * @param  string          $orderBy
+     * @throws DomainException When $orderBy contains bad characters.
+     * @return self
      */
     public function setOrderBy($orderBy)
     {
@@ -135,7 +173,9 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
-     * @return boolean
+     * {@inheritDoc}
+     *
+     * @return bool
      */
     public function getOrder()
     {
@@ -143,8 +183,10 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
-     * @param mixed $order
-     * @return SearchInfo
+     * {@inheritDoc}
+     *
+     * @param  string $order
+     * @return self
      */
     public function setOrder($order)
     {
@@ -166,7 +208,9 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
-     * @return integer
+     * {@inheritDoc}
+     *
+     * @return int
      */
     public function getCurrentPage()
     {
@@ -174,8 +218,10 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
-     * @param integer $page
-     * @return SearchInfo
+     * {@inheritDoc}
+     *
+     * @param  int  $page
+     * @return self
      */
     public function setCurrentPage($page)
     {
@@ -185,7 +231,9 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
-     * @return integer
+     * {@inheritDoc}
+     *
+     * @return int
      */
     public function getPageSize()
     {
@@ -193,8 +241,10 @@ class SessionSearchInfo implements SearchInfoInterface
     }
 
     /**
-     * @param integer $pageSize
-     * @return SearchInfo
+     * {@inheritDoc}
+     *
+     * @param  int  $pageSize
+     * @return self
      */
     public function setPageSize($pageSize)
     {
