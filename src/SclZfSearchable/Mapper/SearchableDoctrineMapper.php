@@ -80,6 +80,12 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
             );
         }
 
+        if (empty($this->searchFields)) {
+            throw new RuntimeException(
+                __METHOD__ . ' was called with no search fields set being set.'
+            );
+        }
+
         if (null === $this->searchInfo->getSearch()) {
             return $qb;
         }
@@ -148,7 +154,7 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
      *
      * @return ZendPaginator|array
      */
-    public function fetchAll()
+    public function findAll()
     {
         if (null === $this->searchInfo) {
             return parent::fetchAll();

@@ -42,7 +42,7 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test that if queryAddSearch() is called with not SearchInfo set that an exception is thrown.
+     * Test that if queryAddSearch() is called with no SearchInfo set then an exception is thrown.
      *
      * @covers            SclZfSearchable\Mapper\SearchableDoctrineMapper::queryAddSearch
      * @expectedException SclZfSearchable\Exception\RuntimeException
@@ -51,6 +51,21 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
      */
     public function testQueryAddSearchWithNoSearchInfo()
     {
+        $this->mapper->queryAddSearch($this->queryBuilder);
+    }
+
+    /**
+     * Test that if queryAddSearch() is called with no search fields set then an exception is thrown.
+     *
+     * @covers            SclZfSearchable\Mapper\SearchableDoctrineMapper::queryAddSearch
+     * @expectedException SclZfSearchable\Exception\RuntimeException
+     *
+     * @return void
+     */
+    public function testQueryAddSearchWithNoSearchFields()
+    {
+        $result = $this->mapper->setSearchInfo($this->searchInfo);
+
         $this->mapper->queryAddSearch($this->queryBuilder);
     }
 
@@ -74,6 +89,8 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
              ->will($this->returnValue(null));
 
         $this->queryBuilder->expects($this->never())->method('where');
+
+        $this->mapper->setSearchFields(array('field'));
 
         $result = $this->mapper->queryAddSearch($this->queryBuilder);
 
