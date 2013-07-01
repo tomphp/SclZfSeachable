@@ -81,7 +81,9 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
         }
 
         if (empty($this->searchFields)) {
-            return $qb;
+            throw new RuntimeException(
+                __METHOD__ . ' was called with no search fields set being set.'
+            );
         }
 
         if (null === $this->searchInfo->getSearch()) {
