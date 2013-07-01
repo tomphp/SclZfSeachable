@@ -80,6 +80,10 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
             );
         }
 
+        if (empty($this->searchFields)) {
+            return $qb;
+        }
+
         if (null === $this->searchInfo->getSearch()) {
             return $qb;
         }
@@ -148,7 +152,7 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
      *
      * @return ZendPaginator|array
      */
-    public function fetchAll()
+    public function findAll()
     {
         if (null === $this->searchInfo) {
             return parent::fetchAll();
