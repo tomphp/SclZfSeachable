@@ -80,7 +80,7 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
     /**
      * Test that activeSearchTerm() just bails with a NULL if no search info is set.
      *
-     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::createQueryBuilder
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
      *
      * @return void
      */
@@ -92,7 +92,7 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
     /**
      * Test that activeSearchTerm() just bails with a NULL if no search fields are set.
      *
-     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::createQueryBuilder
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
      *
      * @return void
      */
@@ -106,7 +106,7 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
     /**
      * Test that activeSearchTerm() just bails with a NULL if no search term is specified.
      *
-     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::createQueryBuilder
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
      * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchFields
      *
      * @return void
@@ -128,7 +128,7 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
     /**
      * Test that activeSearchTerm() just bails with an empty if no search term is specified.
      *
-     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::createQueryBuilder
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
      * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchFields
      *
      * @return void
@@ -150,7 +150,8 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
     /**
      * Test that activeSearchTerm() returns the search term.
      *
-     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::createQueryBuilder
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchFields
      *
      * @return void
      */
