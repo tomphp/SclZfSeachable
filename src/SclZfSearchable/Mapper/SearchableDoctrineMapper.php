@@ -91,6 +91,7 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
             return null;
         }
 
+        // @todo Maybe move this to createSearchExpression
         if (empty($this->searchFields)) {
             return null;
         }
@@ -111,16 +112,14 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
      */
     public function createSearchExpression(QueryBuilder $qb, $searchTerm)
     {
-        $searchExpr = $qb->expr()->orX();
+        $expr = $qb->expr()->orX();
 
         foreach ($this->searchFields as $field) {
-            $searchExpr->add($qb->expr()->like(self::ENTITY . '.' . $field, ':search'));
+            $expr->add($qb->expr()->like(self::ENTITY . '.' . $field, ':search'));
         }
 
-        $expr = $searchExpr;
-
         // @todo Maybe move this outside
-        $qb->setParameter('search', '%' . $this->searchInfo->getSearch() . '%');
+        $qb->setParameter('search', '%' . $searchTerm . '%');
 
         return $expr;
     }
