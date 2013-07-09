@@ -246,4 +246,33 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
 
         return $this->finalizeQuery($qb);
     }
+
+    /**
+     * Simple search matching fields with values.
+     *
+     * @param  array $criteria
+     * @return void
+     */
+    public function findBy(array $criteria)
+    {
+        // Just for speed
+        if (null === $this->searchInfo) {
+            return parent::findBy($criteria);
+        }
+
+        $qb = $this->createQueryBuilder();
+
+        $search = $qb->expr()->andX();
+
+        foreach ($criteria as $field => $value) {
+            $propertyName = self::ENTITY . '.' . $field;
+            $searchName   = ':findBy' . $field;
+
+            $expr = $qb->expr()->eq($propertyName, $searchName);
+
+            $qb->setParameter($searchName, $value);
+        }
+
+        return $this->finalizeQuery($qb, $expr);
+    }
 }
