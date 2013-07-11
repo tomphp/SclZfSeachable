@@ -239,7 +239,7 @@ class SearchableDoctrineMapper extends GenericDoctrineMapper implements
     {
         // Just for speed
         if (null === $this->searchInfo) {
-            return parent::fetchAll();
+            return parent::findAll();
         }
 
         $qb = $this->createQueryBuilder();
