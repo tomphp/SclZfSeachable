@@ -48,11 +48,11 @@ class Module implements
                     'getSearchable'  => 'SclZfSearchable\Controller\Plugin\Searchable',
                 ),
             ),
-            'view_helpers' => array(
-                'invokables' => array(
-                    'sortableColumn' => 'SclZfSearchable\View\Helper\SortableColumn',
-                ),
-            ),
+            'view_manager' => array(
+                'template_path_stack' => array(
+                    'SclZfSearchable' => __DIR__ . '/view',
+                )
+            )
         );
     }
 
