@@ -1,0 +1,77 @@
+<?php
+
+$searchable = $this->searchable;
+$searchInfo = $searchable->getSearchInfo();
+
+?>
+<?php //$this->headScript()->prependFile($this->basePath() . '/js/scl-admin/paginator.js', 'text/javascript'); ?>
+
+<script type="text/javascript">
+/*    $(document).ready(function () {
+        $('#paginated-table').paginate('<?php // echo $this->url('admin/customer', array('action'=>'index'));?>');
+    });
+*/
+</script>
+
+<div id="paginated-table" class="pagination-table">
+    <?php if ($this->addRoute) : ?>
+        <div class="buttons"><a href="<?php echo $this->url($this->addRoute); ?>" class="btn">Add new <?php echo $this->escapeHtml($this->displayName); ?></a></div>
+    <?php endif; ?>
+
+    <?php if ($this->searchRoute) : ?>
+        <div class="search-form">
+            <form class="form-search" action="<?php echo $this->url($this->searchRoute); ?>" method="post">
+                <label>
+                    Search
+                    <span class="input-prepend">
+                        <span class="add-on"><i class="icon-search"></i></span>
+                        <input type="text" name="<?php echo $searchable->searchParamName(); ?>" class="search-query" value="<?php echo $this->escapeHtml($searchInfo->getSearch()); ?>">
+                    </span>
+                </label>
+            <input type="submit" value="Go" class="btn">
+            </form>
+        </div>
+    <?php endif; ?>
+
+
+    <div class="clear"></div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <?php foreach ($this->headings as $heading) : ?>
+                    <?php if (is_array($heading)) : ?>
+                        <?php echo $this->partial(
+                            'scl-zf-searchable/sortable-heading',
+                            array(
+                                'searchable' => $searchable,
+                                'title' => $heading['text'],
+                                'column' => $heading['name'],
+                                'route' => $this->searchRoute
+                            
+                            )
+                        ); ?>
+                    <?php else : ?>
+                        <th><?php echo $this->escapeHtml($heading); ?></th>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($searchable->getList() as $object) : ?>
+                <?php $fields = $fieldBuilder($object, $this); ?>
+                <tr>
+                    <?php foreach ($fields as $field) : ?>
+                        <td><?php echo $field; ?></td>
+                    <?php endforeach; ?>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <?php echo $this->paginationControl(
+        $searchable->getList(),
+        'Sliding',
+        'scl-zf-searchable/pagination-control',
+        array('route' => $this->searchRoute, 'searchable' => $searchable)
+    ); ?>
+</div>

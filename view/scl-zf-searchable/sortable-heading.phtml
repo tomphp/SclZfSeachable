@@ -1,0 +1,26 @@
+<?php
+
+$searchable = $this->searchable;
+$searchInfo = $searchable->getSearchInfo();
+$active     = ($this->column == $searchInfo->getOrderBy());
+$ascending  = ($searchInfo->getOrder() == $searchInfo::SORT_ASC);
+$sortClass  = $ascending ? 'sortasc' : 'sortdesc';
+
+if (!$active) {
+    $sortOrder = 'asc';
+} else {
+    $sortOrder = $ascending ? 'desc' : 'asc';
+}
+?>
+<th <?php if ($active) echo "class=\"$sortClass\""; ?>>
+    <a href="<?php
+        echo $this->url(
+            $this->route,
+            array(),
+            array('query' => array(
+                    $searchable->orderByParamName() => $this->column,
+                    $searchable->orderParamName() => $sortOrder
+            ))
+        );
+    ?>"><i class="icon-arrow-up hidden"></i><i class="icon-arrow-down hidden"></i><?php echo $this->title; ?></a>
+</th>
