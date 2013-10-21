@@ -9,7 +9,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 use SclZfSearchable\Exception\RuntimeException;
 use SclZfSearchable\SearchableRepositoryInterface;
 use SclZfSearchable\SearchInfo\SearchInfoInterface;
-use SclZfUtilities\Mapper\GenericDoctrineMapper;
+use SclZfGenericMapper\DoctrineMapper;
 use Zend\Paginator\Paginator as ZendPaginator;
 
 /**
@@ -17,7 +17,7 @@ use Zend\Paginator\Paginator as ZendPaginator;
  *
  * @author Tom Oram <tom@scl.co.uk>
  */
-class SearchableDoctrineMapper extends GenericDoctrineMapper implements
+class SearchableDoctrineMapper extends DoctrineMapper implements
     SearchableRepositoryInterface
 {
     /**

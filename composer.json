@@ -17,7 +17,7 @@
     },
     "require-dev": {
         "zf-commons/zfc-user-doctrine-orm": "dev-master",
-        "sclinternet/scl-zf-utilities": "dev-master",
+        "sclinternet/scl-zf-generic-mapper": "dev-master",
         "phpunit/phpunit" : "3.7.*",
         "phpmd/phpmd" : "1.4.0",
         "squizlabs/php_codesniffer": "1.*",

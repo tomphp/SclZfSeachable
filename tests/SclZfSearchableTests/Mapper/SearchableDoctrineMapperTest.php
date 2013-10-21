@@ -11,7 +11,7 @@ use SclZfSearchable\Mapper\SearchableDoctrineMapper;
  */
 class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
 {
-    const ENTITY_NAME = 'TestEntity';
+    const ENTITY_NAME = 'stdClass';
 
     protected $mapper;
 
@@ -27,11 +27,11 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->mapper = new SearchableDoctrineMapper(
+            new \stdClass(),
             $this->getMock('Doctrine\Common\Persistence\ObjectManager'),
-            $this->getMockBuilder('SclZfUtilities\Doctrine\FlushLock')
+            $this->getMockBuilder('SclZfGenericMapper\Doctrine\FlushLock')
                  ->disableOriginalConstructor()
-                 ->getMock(),
-            self::ENTITY_NAME
+                 ->getMock()
         );
 
         $this->queryBuilder = $this->getMockBuilder('Doctrine\ORM\QueryBuilder')
