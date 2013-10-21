@@ -66,35 +66,97 @@ class SearchableDoctrineMapper extends DoctrineMapper implements
     }
 
     /**
-     * Applies the given search terms to the query builder's where clause.
+     * Create a QueryBuilder and set the select & from values.
      *
-     * @param  QueryBuilder     $qb
      * @return QueryBuilder
-     * @throws RuntimeException When called with out searchInfo being set.
      */
-    public function queryAddSearch(QueryBuilder $qb)
+    public function createQueryBuilder()
+    {
+        $qb = $this->entityManager->createQueryBuilder();
+
+        $qb->select(self::ENTITY)
+           ->from($this->getEntityName(), self::ENTITY);
+
+        return $qb;
+    }
+
+    /**
+     * Returns the active search term.
+     *
+     * @return string|null NULL if there is no term to be searched by.
+     */
+    public function activeSearchTerm()
     {
         if (null === $this->searchInfo) {
-            throw new RuntimeException(
-                __METHOD__ . ' was called without SearchInfo being set.'
-            );
+            return null;
         }
 
-        if (null === $this->searchInfo->getSearch()) {
-            return $qb;
+        // @todo Maybe move this to createSearchExpression
+        if (empty($this->searchFields)) {
+            return null;
         }
 
+        if (null == $this->searchInfo->getSearch()) {
+            return null;
+        }
+
+        return $this->searchInfo->getSearch();
+    }
+
+    /**
+     * Create an {@see Expr} object with the search part of the where clause.
+     *
+     * @param  QueryBuilder $qb
+     * @param  string       $searchTerm The string to search for.
+     * @return Expr         The search part of the where clause.
+     */
+    public function createSearchExpression(QueryBuilder $qb, $searchTerm)
+    {
         $expr = $qb->expr()->orX();
 
         foreach ($this->searchFields as $field) {
             $expr->add($qb->expr()->like(self::ENTITY . '.' . $field, ':search'));
         }
 
-        $qb->where($expr);
+        // @todo Maybe move this outside
+        $qb->setParameter('search', '%' . $searchTerm . '%');
 
-        $qb->setParameter('search', '%' . $this->searchInfo->getSearch() . '%');
+        return $expr;
+    }
 
-        return $qb;
+    /**
+     * Constructs the complete where clause from the search express and the given expression.
+     *
+     * @param  QueryBuilder        $qb
+     * @param  Expr|Composite      $expr
+     * @return Expr|Composite|null The full where clause or NULL.
+     */
+    public function whereClause(QueryBuilder $qb, $expr = null)
+    {
+        $searchTerm = $this->activeSearchTerm();
+
+        if (null === $expr && null === $searchTerm) {
+            return null;
+        }
+
+        if (null !== $searchTerm) {
+            $searchExpr = $this->createSearchExpression($qb, $searchTerm);
+        }
+
+        if (isset($searchExpr) && null === $expr) {
+            return $searchExpr;
+        }
+
+        if (!isset($searchExpr) && null !== $expr) {
+            return $expr;
+        }
+
+        $where = $qb->expr()->andX();
+
+        $where->add($expr);
+        $where->add($searchExpr);
+
+        return $where;
     }
 
     /**
@@ -107,9 +169,7 @@ class SearchableDoctrineMapper extends DoctrineMapper implements
     public function queryAddOrderBy(QueryBuilder $qb)
     {
         if (null === $this->searchInfo) {
-            throw new RuntimeException(
-                __METHOD__ . ' was called without SearchInfo being set.'
-            );
+            return $qb;
         }
 
         if (null === $this->searchInfo->getOrderBy()) {
@@ -128,7 +188,7 @@ class SearchableDoctrineMapper extends DoctrineMapper implements
     /**
      * Paginates the results from a doctrine query.
      *
-     * @param  Query $query
+     * @param  Query         $query
      * @return ZendPaginator
      */
     protected function paginateQuery(Query $query)
@@ -143,27 +203,76 @@ class SearchableDoctrineMapper extends DoctrineMapper implements
         return $paginator;
     }
 
+
+    /**
+     * Applies the where clause to the
+     *
+     * @param  QueryBuilder   $qb
+     * @param  Expr|Composite $expr
+     * @return mixed
+     */
+    public function finalizeQuery(QueryBuilder $qb, $expr = null)
+    {
+        $where = $this->whereClause($qb, $expr);
+
+        if (null !== $where) {
+            $qb->where($where);
+        }
+
+        $this->queryAddOrderBy($qb);
+
+        // @todo Maybe convert results to arrays
+
+        if (null !== $this->searchInfo) {
+            return $this->paginateQuery($qb->getQuery());
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     /**
      * Returns all entities that match the search criteria.
      *
      * @return ZendPaginator|array
      */
-    public function fetchAll()
+    public function findAll()
     {
+        // Just for speed
         if (null === $this->searchInfo) {
-            return parent::fetchAll();
+            return parent::findAll();
         }
 
-        $qb = $this->entityManager->createQueryBuilder();
+        $qb = $this->createQueryBuilder();
 
-        $qb->select(self::ENTITY)
-           ->from($this->entityName, self::ENTITY);
+        return $this->finalizeQuery($qb);
+    }
 
-        $this->queryAddSearch($qb);
+    /**
+     * Simple search matching fields with values.
+     *
+     * @param  array $criteria
+     * @return void
+     */
+    public function findBy(array $criteria)
+    {
+        // Just for speed
+        if (null === $this->searchInfo) {
+            return parent::findBy($criteria);
+        }
 
-        $this->queryAddOrderBy($qb);
+        $qb = $this->createQueryBuilder();
 
-        // @todo Maybe convert this to an array?
-        return $this->paginateQuery($qb->getQuery());
+        $search = $qb->expr()->andX();
+
+        foreach ($criteria as $field => $value) {
+            $propertyName = self::ENTITY . '.' . $field;
+            $searchName   = ':findBy' . $field;
+
+            $expr = $qb->expr()->eq($propertyName, $searchName);
+
+            $qb->setParameter($searchName, $value);
+        }
+
+        return $this->finalizeQuery($qb, $expr);
     }
 }

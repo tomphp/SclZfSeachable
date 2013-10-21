@@ -45,14 +45,14 @@ class Module implements
         return array(
             'controller_plugins' => array(
                 'invokables' => array(
-                    'getSearchable'  => 'SclObjectManager\Controller\Plugin\Searchable',
+                    'getSearchable'  => 'SclZfSearchable\Controller\Plugin\Searchable',
                 ),
             ),
-            'view_helpers' => array(
-                'invokables' => array(
-                    'sortableColumn' => 'SclObjectManager\View\Helper\SortableColumn',
-                ),
-            ),
+            'view_manager' => array(
+                'template_path_stack' => array(
+                    'SclZfSearchable' => __DIR__ . '/view',
+                )
+            )
         );
     }
 
@@ -66,7 +66,6 @@ class Module implements
         return array(
             'shared' => array(
                 'SclZfSearchable\Searchable'                     => false,
-                'SclZfSearchable\SearchInfo\SearchInfoInterface' => false,
                 'SclZfSearchable\SearchInfo\BasicSearchInfo'     => false,
                 'SclZfSearchable\SearchInfo\SessionSearchInfo'   => false,
             ),

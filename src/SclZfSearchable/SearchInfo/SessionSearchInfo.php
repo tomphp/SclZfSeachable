@@ -32,6 +32,13 @@ class SessionSearchInfo implements SearchInfoInterface
     protected $container;
 
     /**
+     * The name of the search info instance.
+     *
+     * @var string
+     */
+    protected $name;
+
+    /**
      * @param  Container $container
      * @return self
      * @todo   Maybe use the constructor to set this.
@@ -70,17 +77,28 @@ class SessionSearchInfo implements SearchInfoInterface
 
         $name = $this->name;
 
-        $this->container->$name[$key] = $value;
+        // The value you needs to be copied out into a variable, modified
+        // and the set back in the container because the container use the
+        // __get() magic method which can't handle being reference with
+        // an array index.
+
+        $values = $this->container->$name;
+
+        $values[$key] = $value;
+
+        $this->container->$name = $values;
     }
 
     /**
      * Stores a value to the session container.
      *
      * @param  string       $key
-     * @return void
+     * @param  mixed        $return The value to return if one is not set in session.
+     * @return mixed
      * @throws RuntimeError If the session container has not been set yet.
+     * @throws RuntimeError When the values returned from the session are not an array.
      */
-    protected function retrieveValue($key)
+    protected function retrieveValue($key, $return = null)
     {
         if (null === $this->container) {
             throw RuntimeError(
@@ -91,11 +109,25 @@ class SessionSearchInfo implements SearchInfoInterface
 
         $name = $this->name;
 
-        if (!isset($this->container->$name[$key])) {
-            return null;
+        // The value you needs to be copied out into a variable, modified
+        // and the set back in the container because the container use the
+        // __get() magic method which can't handle being reference with
+        // an array index.
+
+        $values = $this->container->$name;
+
+        if (!is_array($values)) {
+            throw new RuntimeException(
+                'Values should be stored in the session as an array in '
+                . __METHOD__
+            );
         }
 
-        return $this->container->$name[$key];
+        if (!isset($values[$key])) {
+            return $return;
+        }
+
+        return $values[$key];
     }
 
     /**

@@ -74,7 +74,7 @@ class Searchable extends AbstractPlugin
         SearchableRepository $repository,
         $name,
         $listName,
-        $params = null
+        array $params = array()
     ) {
         $serviceLocator = $this->getServiceLocator();
 

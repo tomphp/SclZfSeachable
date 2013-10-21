@@ -15,6 +15,8 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
 
     protected $mapper;
 
+    protected $entityManager;
+
     protected $queryBuilder;
 
     protected $searchInfo;
@@ -26,9 +28,13 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
+        $this->entityManager = $this->getMockBuilder('Doctrine\ORM\EntityManager')
+                                    ->disableOriginalConstructor()
+                                    ->getMock();
+
         $this->mapper = new SearchableDoctrineMapper(
             new \stdClass(),
-            $this->getMock('Doctrine\Common\Persistence\ObjectManager'),
+            $this->entityManager,
             $this->getMockBuilder('SclZfGenericMapper\Doctrine\FlushLock')
                  ->disableOriginalConstructor()
                  ->getMock()
@@ -42,79 +48,145 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test that if queryAddSearch() is called with not SearchInfo set that an exception is thrown.
+     * testCreateQueryBuilder
      *
-     * @covers            SclZfSearchable\Mapper\SearchableDoctrineMapper::queryAddSearch
-     * @expectedException SclZfSearchable\Exception\RuntimeException
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::createQueryBuilder
      *
      * @return void
      */
-    public function testQueryAddSearchWithNoSearchInfo()
+    public function testCreateQueryBuilder()
     {
-        $this->mapper->queryAddSearch($this->queryBuilder);
+        $this->entityManager->expects($this->once())
+                      ->method('createQueryBuilder')
+                      ->will($this->returnValue($this->queryBuilder));
+
+        $this->queryBuilder
+             ->expects($this->once())
+             ->method('select')
+             ->with($this->equalTo('e'))
+             ->will($this->returnValue($this->queryBuilder));
+
+        $this->queryBuilder
+             ->expects($this->once())
+             ->method('from')
+             ->with($this->equalTo(self::ENTITY_NAME), $this->equalTo('e'))
+             ->will($this->returnValue($this->queryBuilder));
+
+        $qb = $this->mapper->createQueryBuilder();
+
+        $this->assertSame($this->queryBuilder, $qb);
     }
 
     /**
-     * Test that when the search string is null the query builder is just returned.
+     * Test that activeSearchTerm() just bails with a NULL if no search info is set.
      *
-     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::queryAddSearch
-     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchInfo
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
      *
      * @return void
      */
-    public function testQueryAddSearchWithNullSearchTerm()
+    public function testActiveSearchTermWithNoSearchInfo()
     {
-        $result = $this->mapper->setSearchInfo($this->searchInfo);
+        $this->assertNull($this->mapper->activeSearchTerm());
+    }
 
-        $this->assertEquals($this->mapper, $result, 'setSearchInfo didn\'t return $this');
+    /**
+     * Test that activeSearchTerm() just bails with a NULL if no search fields are set.
+     *
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
+     *
+     * @return void
+     */
+    public function testActiveSearchTermWithNoSearchFields()
+    {
+        $this->mapper->setSearchInfo($this->searchInfo);
 
+        $this->assertNull($this->mapper->activeSearchTerm());
+    }
+
+    /**
+     * Test that activeSearchTerm() just bails with a NULL if no search term is specified.
+     *
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchFields
+     *
+     * @return void
+     */
+    public function testActiveSearchTermWithNoSearchTerm()
+    {
         $this->searchInfo
              ->expects($this->once())
              ->method('getSearch')
              ->will($this->returnValue(null));
 
-        $this->queryBuilder->expects($this->never())->method('where');
+        $this->mapper->setSearchInfo($this->searchInfo);
 
-        $result = $this->mapper->queryAddSearch($this->queryBuilder);
+        $this->mapper->setSearchFields(array('field'));
 
-        $this->assertEquals($this->queryBuilder, $result);
+        $this->assertNull($this->mapper->activeSearchTerm());
     }
 
     /**
-     * Test that a where expression is correctly constructed.
+     * Test that activeSearchTerm() just bails with an empty if no search term is specified.
      *
-     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::queryAddSearch
-     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchInfo
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
      * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchFields
      *
      * @return void
      */
-    public function testQueryAddSearch()
+    public function testActiveSearchTermWithEmptySearchTerm()
     {
-        $search = 'search-string';
-        $field = 'column1';
+        $this->searchInfo
+             ->expects($this->once())
+             ->method('getSearch')
+             ->will($this->returnValue(''));
 
+        $this->mapper->setSearchInfo($this->searchInfo);
+
+        $this->mapper->setSearchFields(array('field'));
+
+        $this->assertNull($this->mapper->activeSearchTerm());
+    }
+
+    /**
+     * Test that activeSearchTerm() returns the search term.
+     *
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::activeSearchTerm
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchFields
+     *
+     * @return void
+     */
+    public function testActiveSearchTermWithSearchTerm()
+    {
         $this->searchInfo
              ->expects($this->atLeastOnce())
              ->method('getSearch')
-             ->will($this->returnValue($search));
+             ->will($this->returnValue('find-me'));
 
-        $expr = $this->getMockBuilder('Doctrine\ORM\Query\Expr')
-                     ->disableOriginalConstructor()
-                     ->getMock();
+        $this->mapper->setSearchInfo($this->searchInfo);
 
-        $orx = $this->getMockBuilder('Doctrine\ORM\Query\Expr\Orx')
-                    ->disableOriginalConstructor()
-                    ->getMock();
+        $this->mapper->setSearchFields(array('field'));
 
-        $like = $this->getMockBuilder('Doctrine\ORM\Query\Expr\Comparison')
-                     ->disableOriginalConstructor()
-                     ->getMock();
+        $this->assertEquals(
+            'find-me',
+            $this->mapper->activeSearchTerm()
+        );
+    }
 
-        // Set up the expectations
+    /**
+     * Test the creation of a search expression.
+     *
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::createSearchExpression
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::setSearchFields
+     */
+    public function testCreateSearchExpression()
+    {
+        $expr = $this->getMock('Doctrine\ORM\Query\Expr');
+        $orx  = $this->getMock('Doctrine\ORM\Query\Expr\Orx');
+
+        $searchFields = array('field1');
 
         $this->queryBuilder
-             ->expects($this->atLeastOnce())
+             ->expects($this->any())
              ->method('expr')
              ->will($this->returnValue($expr));
 
@@ -124,49 +196,27 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
 
         $expr->expects($this->once())
              ->method('like')
-             ->with($this->equalTo('e.' . $field), $this->equalTo(':search'))
-             ->will($this->returnValue($like));
+             ->with($this->equalTo('e.field1'), $this->equalTo(':search'))
+             ->will($this->returnValue('like-1'));
 
-        $orx->expects($this->once())
-             ->method('add')
-             ->with($this->equalTo($like));
+        $this->mapper->setSearchFields($searchFields);
 
-        $this->queryBuilder
-             ->expects($this->once())
-             ->method('where')
-             ->with($this->equalTo($orx));
-
-        $this->queryBuilder
-             ->expects($this->once())
-             ->method('setParameter')
-             ->with($this->equalTo('search'), $this->equalTo("%$search%"));
-
-        // Perform the tests
-
-        $result = $this->mapper->setSearchInfo($this->searchInfo);
-
-        $this->assertEquals($this->mapper, $result, 'setSearchInfo didn\'t return $this');
-
-        $result = $this->mapper->setSearchFields(array($field));
-
-        $this->assertEquals($this->mapper, $result, 'setSearchFields did not return $this');
-
-        $result = $this->mapper->queryAddSearch($this->queryBuilder);
-
-        $this->assertEquals($this->queryBuilder, $result, 'queryAddSearch didn\'t return $this');
+        $this->mapper->createSearchExpression($this->queryBuilder, 'search-term');
     }
 
     /**
-     * Test that if queryAddOrderBy() is called with not SearchInfo set that an exception is thrown.
+     * Test that if queryAddOrderBy() is called with no SearchInfo set then the
+     * query builder is returned.
      *
-     * @covers            SclZfSearchable\Mapper\SearchableDoctrineMapper::queryAddOrderBy
-     * @expectedException SclZfSearchable\Exception\RuntimeException
+     * @covers SclZfSearchable\Mapper\SearchableDoctrineMapper::queryAddOrderBy
      *
      * @return void
      */
     public function testQueryAddOrderByWithNoSearchInfo()
     {
-        $this->mapper->queryAddOrderBy($this->queryBuilder);
+        $qb = $this->mapper->queryAddOrderBy($this->queryBuilder);
+
+        $this->assertSame($this->queryBuilder, $qb);
     }
 
     /**
@@ -192,7 +242,7 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->mapper->queryAddOrderBy($this->queryBuilder);
 
-        $this->assertEquals($this->queryBuilder, $result);
+        $this->assertSame($this->queryBuilder, $result);
     }
 
     /**
@@ -230,6 +280,6 @@ class SearchableDoctrineMapperTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->mapper->queryAddOrderBy($this->queryBuilder);
 
-        $this->assertEquals($this->queryBuilder, $result);
+        $this->assertSame($this->queryBuilder, $result);
     }
 }
